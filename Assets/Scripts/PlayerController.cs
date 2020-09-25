@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     private float jumpForce = 5.0f;
 
     [Header("Movement")]
-    public float gravityMultiplier = 1.5f; 
+    public float gravityMultiplier = 1.5f;
     private float h;
     [SerializeField]
     private float speed = 5.0f;
@@ -41,6 +41,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     int sprayDmg;
 
+    [Header("Triggers")]
+    public bool orange = false;
+    public bool pink = false;
+    public bool yellow = false;
+    public bool allTurned = false;
+
 
     private bool triggered;
     [SerializeField] Collider2D collisionObj;
@@ -50,7 +56,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     IEnumerator DeathCountdown()
     {
-        
+
         this.GetComponent<Rigidbody2D>().simulated = false;
         anim.SetBool("isJump", false);
         anim.SetBool("isWalk", false);
@@ -67,7 +73,7 @@ public class PlayerController : MonoBehaviour
     }
     IEnumerator JumpAnimation()
     {
-        
+
         yield return new WaitForSeconds(.1f);
         anim.SetBool("isJump", true);
 
@@ -80,8 +86,8 @@ public class PlayerController : MonoBehaviour
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
         currentState = PlayerState.Idle;
-        rb.gravityScale = gravityMultiplier; 
-        jumpForce *= Mathf.Sqrt(gravityMultiplier); 
+        rb.gravityScale = gravityMultiplier;
+        jumpForce *= Mathf.Sqrt(gravityMultiplier);
         triggered = false;
         anim.SetBool("isDead", false);
         once = false;
@@ -147,7 +153,7 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                anim.SetBool("isWalk", false); 
+                anim.SetBool("isWalk", false);
             }
         }
         else if (currentState == PlayerState.Dead)
@@ -177,6 +183,7 @@ public class PlayerController : MonoBehaviour
                 GameObject oBucket = GameObject.FindWithTag("o_bucket");
                 oBucket.GetComponent<BucketSpill>().Spill();
                 StartCoroutine(SwitchAnimation());
+                orange = true;
 
             }
             else if (collisionObj.tag == "p_trigger")
@@ -185,6 +192,7 @@ public class PlayerController : MonoBehaviour
                 GameObject pBucket = GameObject.FindWithTag("p_bucket");
                 pBucket.GetComponent<BucketSpill>().Spill();
                 StartCoroutine(SwitchAnimation());
+                pink = true;
             }
             else if (collisionObj.tag == "y_trigger")
             {
@@ -192,7 +200,12 @@ public class PlayerController : MonoBehaviour
                 GameObject yBucket = GameObject.FindWithTag("y_bucket");
                 yBucket.GetComponent<BucketSpill>().Spill();
                 StartCoroutine(SwitchAnimation());
+                yellow = true;
             }
+        }
+        if (yellow == true && pink == true && orange == true)
+        {
+            allTurned = true;
         }
 
 
@@ -209,15 +222,15 @@ public class PlayerController : MonoBehaviour
         GameObject.Find("PlayerAudio").GetComponent<PlayerAudio>().PlayJump();
         rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
         StartCoroutine(JumpAnimation());
-       // anim.SetBool("isJump", true);
+        // anim.SetBool("isJump", true);
 
 
     }
 
     void TakeDamage(int damage)
     {
-        
-        currentHealth -= damage; 
+
+        currentHealth -= damage;
         healthBar.SetHealth(currentHealth);
     }
 
@@ -230,20 +243,20 @@ public class PlayerController : MonoBehaviour
             Destroy(collision.gameObject);
             if (currentHealth <= 0)
             {
-                if(once == false)
+                if (once == false)
                 {
                     StartCoroutine(DeathCountdown());
                     once = true;
-                    
+
                 }
-                
+
                 //Destroy(gameObject); 
                 //GameObject.Find("LoadTransition").GetComponent<LoadTransition>().LoadNextScene("LoseScene"); 
             }
         }
         else if (collision.tag == "portal" && ScoreCounter.turnedGood == EnemyKill)
         {
-            GameObject.Find("PlayerAudio").GetComponent<PlayerAudio>().PlayClear(); 
+            GameObject.Find("PlayerAudio").GetComponent<PlayerAudio>().PlayClear();
             GameObject.Find("LoadTransition").GetComponent<LoadTransition>().LoadBoss();
         }
         else if (collision.tag == "o_trigger" || collision.tag == "p_trigger" || collision.tag == "y_trigger")

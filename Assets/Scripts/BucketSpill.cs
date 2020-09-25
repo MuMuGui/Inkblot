@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BucketSpill : MonoBehaviour
 {
@@ -8,12 +9,22 @@ public class BucketSpill : MonoBehaviour
     [SerializeField] GameObject PaintAmmo;
     Animator anim;
     bool spillonce;
+    PlayerController BossCount;
+    bool allFlip = true;
     IEnumerator Countdown()
     {
-        
+
         yield return new WaitForSeconds(10);
-        Respawn();
-        
+        if (allFlip == true)
+        {
+            Respawn();
+            if (SceneManager.GetActiveScene().name == "BossLevel")
+            {
+                allFlip = false;
+            }
+        }
+
+
     }
     void Start()
     {
@@ -21,14 +32,25 @@ public class BucketSpill : MonoBehaviour
         spillonce = false;
         anim.SetBool("Turn", false);
         //StartCoroutine(Respawn());
-        
+        BossCount = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+        if (SceneManager.GetActiveScene().name != "BossLevel")
+        {
+            allFlip = true;
+        }
+        else if (SceneManager.GetActiveScene().name == "BossLevel")
+        {
+            allFlip = false;
+        }
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (BossCount.allTurned == true)
+        {
+            allFlip = true;
+        }
     }
     public void Spill()
     {
